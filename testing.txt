@@ -1,9 +1,0 @@
-This is a test file
-
-It includes test data
-
-Yippee
-
-12345
-
-!@#$%^&*()

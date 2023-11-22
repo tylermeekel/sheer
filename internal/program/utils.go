@@ -63,7 +63,7 @@ func ReadConfig() *Config {
 	exPath := filepath.Dir(ex)
 	fmt.Println(exPath)
 	
-	configPath := exPath + "/config.json"
+	configPath := exPath + "/sheerconfig.json"
 
 	data, err := os.ReadFile(configPath)
 	if errors.Is(err, fs.ErrNotExist) {

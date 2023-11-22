@@ -1,7 +1,9 @@
 package main
 
-import "github.com/tylermeekel/p2pfileshare/internal/cli"
+import (
+	"github.com/tylermeekel/p2pfileshare/internal/program"
+)
 
 func main() {
-	cli.RunApp()
+	program.RunApp()
 }

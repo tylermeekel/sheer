@@ -1,4 +1,4 @@
-package cli
+package program
 
 import (
 	"flag"
@@ -7,17 +7,17 @@ import (
 )
 
 func RunApp() {
-	var stunIP string
-	flag.StringVar(&stunIP, "stunip", "STUN:freestun.net:3479", "Sets the IP for the STUN server")
+	config := ReadConfig()
 
 	flag.Parse()
 
 	cmd := strings.ToLower(flag.Arg(0))
-	argument := strings.ToLower(flag.Arg(1))
+	filepath := flag.Arg(1)
+
 	if cmd == "send" || cmd == "s" {
-		send(stunIP, argument)
+		send(config, filepath)
 	} else if cmd == "receive" || cmd == "r" {
-		receive(argument)
+		receive(*config)
 	} else {
 		fmt.Printf("Command \"%s\" not found.\n", cmd)
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/tylermeekel/p2pfileshare/internal/program"
+	"github.com/tylermeekel/sheer/internal/program"
 )
 
 func main() {

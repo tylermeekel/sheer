@@ -1,4 +1,4 @@
-module github.com/tylermeekel/p2pfileshare
+module github.com/tylermeekel/sheer
 
 go 1.21.0
 

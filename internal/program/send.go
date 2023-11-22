@@ -35,7 +35,7 @@ func send(config *Config, filepath string) {
 
 	file, err := os.Open(filepath)
 	if errors.Is(err, fs.ErrNotExist) {
-		fmt.Printf("File \"%s\" does not exist.", filepath)
+		fmt.Printf("File \"%s\" does not exist.\n", filepath)
 		os.Exit(1)
 	} else if err != nil {
 		fmt.Printf("Error opening file: \"%s\"\n", filepath)

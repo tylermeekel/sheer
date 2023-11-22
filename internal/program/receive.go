@@ -33,14 +33,14 @@ func receive(config Config) {
 	fmt.Println(getLineWithMessage("PASTE OFFER AND HIT ENTER"))
 	_, err = fmt.Scanln(&encodedOffer)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error reading offer:", err)
 	}
 	fmt.Println(getLineWithMessage(""))
 
 	jsonOffer := make([]byte, base64.StdEncoding.DecodedLen(len(encodedOffer)))
 	n, err := base64.StdEncoding.Decode(jsonOffer, []byte(encodedOffer))
 	if err != nil {
-		panic(err)
+		fmt.Println("Error decoding offer:",err)
 	}
 	jsonOffer = jsonOffer[:n]
 

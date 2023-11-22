@@ -3,7 +3,9 @@ package program
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/pion/webrtc/v3"
@@ -32,19 +34,25 @@ func send(config *Config, filepath string) {
 	}()
 
 	file, err := os.Open(filepath)
-	if err != nil {
-		panic(err)
+	if errors.Is(err, fs.ErrNotExist) {
+		fmt.Printf("File \"%s\" does not exist.", filepath)
+		os.Exit(1)
+	} else if err != nil {
+		fmt.Printf("Error opening file: \"%s\"\n", filepath)
+		os.Exit(1)
 	}
 
 	fileInfo, err := file.Stat()
 	if err != nil {
-		panic(err)
+		fmt.Println("Error getting file stats:", err.Error())
+		os.Exit(1)
 	}
 
 	fileData := make([]byte, fileInfo.Size())
 	_, err = file.Read(fileData)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error reading file:", err.Error())
+		os.Exit(1)
 	}
 	file.Close()
 
@@ -88,7 +96,8 @@ func send(config *Config, filepath string) {
 	jsonAnswer := make([]byte, base64.StdEncoding.DecodedLen(len(encodedAnswer)))
 	n, err := base64.StdEncoding.Decode(jsonAnswer, []byte(encodedAnswer))
 	if err != nil {
-		panic(err)
+		fmt.Println("Unable to decode response:", err)
+		os.Exit(1)
 	}
 	jsonAnswer = jsonAnswer[:n]
 

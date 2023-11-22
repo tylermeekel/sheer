@@ -61,7 +61,6 @@ func ReadConfig() *Config {
 	}
 
 	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
 	
 	configPath := exPath + "/sheerconfig.json"
 

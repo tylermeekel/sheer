@@ -17,6 +17,11 @@ type Offer struct {
 }
 
 func send(config *Config, filepath string) {
+	if filepath == "" {
+		fmt.Println("Please enter a filename!")
+		os.Exit(1)
+	}
+
 	ClearTerminal()
 
 	rtcConfig := webrtc.Configuration{
@@ -104,6 +109,9 @@ func send(config *Config, filepath string) {
 	//Unmarshal JSON-formatted answer into a SessionDescription object
 	var answer webrtc.SessionDescription
 	err = json.Unmarshal(jsonAnswer, &answer)
+	if err != nil {
+		panic(err)
+	}
 
 	//Set RemoteDescription and begin waiting for connection
 	peerConnection.SetRemoteDescription(answer)
@@ -122,14 +130,31 @@ func ConfigureSenderPeerConnection(peerConnection *webrtc.PeerConnection, fileDa
 		panic(err)
 	}
 
+	fileDataChannel.OnClose(func() {
+		fmt.Println("Done!")
+		peerConnection.Close()
+		os.Exit(1)
+	})
+
 	fileDataChannel.OnOpen(func() {
 		fmt.Println("Sending file data...")
 
-		fileDataChannel.Send(fileData)
+		if len(fileData) > 65535 {
+			chunks := splitBytesBySize(fileData, 65535)
 
-		for fileDataChannel.BufferedAmount() > 0 {
+			fileDataChannel.SendText(fmt.Sprintf("%d", len(chunks)))
+			for _, chunk := range chunks {
+				fileDataChannel.Send(chunk)
+			}
+		} else {
+			err := fileDataChannel.Send(fileData)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
-		peerConnection.Close()
+
+		for fileDataChannel.BufferedAmount() > 0 {}
+		fileDataChannel.SendText("done")
 	})
 
 	//Configure Local SDP

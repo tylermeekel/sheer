@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
+	"strconv"
+	"sync"
 
 	"github.com/pion/webrtc/v3"
 )
@@ -40,7 +41,7 @@ func receive(config Config) {
 	jsonOffer := make([]byte, base64.StdEncoding.DecodedLen(len(encodedOffer)))
 	n, err := base64.StdEncoding.Decode(jsonOffer, []byte(encodedOffer))
 	if err != nil {
-		fmt.Println("Error decoding offer:",err)
+		fmt.Println("Error decoding offer:", err)
 	}
 	jsonOffer = jsonOffer[:n]
 
@@ -70,20 +71,41 @@ func receive(config Config) {
 func ConfigureReceiverPeerConnection(peerConnection *webrtc.PeerConnection, offer Offer) {
 
 	peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
-		if d.Label() == "filedata" {
-			d.OnOpen(func() {
-				fmt.Println("Parsing filedata...")
-			})
 
-			d.OnMessage(func(msg webrtc.DataChannelMessage) {
-				os.WriteFile(filepath.Base(offer.Metadata.FileName), msg.Data, 0644)
-			})
+		var wg sync.WaitGroup
+		mux := &sync.Mutex{}
+		var data []byte
 
-			d.OnClose(func() {
-				fmt.Println("Closed data transfer.")
-				os.Exit(0)
-			})
-		}
+		d.OnMessage(func(msg webrtc.DataChannelMessage) {
+			// Use string messages to pass data and signal when done.
+			if msg.IsString {
+				//Receive signal that sending is done
+				if string(msg.Data) == "done" {
+					//Wait for data to be added to slice
+					wg.Wait()
+					err := os.WriteFile(offer.Metadata.FileName, data, 0644)
+					if err != nil {
+						fmt.Println("error writing file", err)
+					}
+					d.Close()
+					os.Exit(0)
+				} else {
+					n, err := strconv.Atoi(string(msg.Data))
+					print(n)
+					if err != nil {
+						panic(err)
+					}
+					wg.Add(n)
+				}
+			} else {
+				go func() {
+					defer wg.Done()
+					mux.Lock()
+					data = append(data, msg.Data...)
+					mux.Unlock()
+				}()
+			}
+		})
 	})
 
 	err := peerConnection.SetRemoteDescription(offer.Description)

@@ -18,6 +18,8 @@ func RunApp() {
 		send(config, filepath)
 	} else if cmd == "receive" || cmd == "r" {
 		receive(*config)
+	} else if cmd == "" {
+		fmt.Println("Please enter a command.")
 	} else {
 		fmt.Printf("Command \"%s\" not found.\n", cmd)
 	}

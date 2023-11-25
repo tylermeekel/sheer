@@ -77,10 +77,6 @@ func ReadConfig() *Config {
 func CreateDefaultConfig(configPath string) *Config {
 	fmt.Println("Config not found. Creating new default config.")
 
-	ex, err := os.Executable()
-	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
-
 	file, err := os.Create(configPath)
 	if err != nil {
 		panic(err)
@@ -93,6 +89,10 @@ func CreateDefaultConfig(configPath string) *Config {
 	}
 
 	jsonConfig, err := json.MarshalIndent(&defaultConfig, "", "\t")
+	if err != nil{
+		fmt.Println("Error creating config file:", err)
+		os.Exit(0)
+	}
 
 	file.Write(jsonConfig)
 	file.Close()
@@ -116,4 +116,17 @@ func ConfigureDefaultPeerConnection(peerConnection *webrtc.PeerConnection) {
 			os.Exit(0)
 		}
 	})
+}
+
+func splitBytesBySize(buf []byte, lim int) [][]byte {
+	var chunk []byte
+	chunks := make([][]byte, 0, len(buf)/lim+1)
+	for len(buf) >= lim {
+		chunk, buf = buf[:lim], buf[lim:]
+		chunks = append(chunks, chunk)
+	}
+	if len(buf) > 0 {
+		chunks = append(chunks, buf)
+	}
+	return chunks
 }

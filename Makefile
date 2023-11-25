@@ -1,8 +1,8 @@
 build:
-	go build -o ./bin
+	go build -o ./bin/sheer
 
 send: build
-	./bin/p2pfileshare s ./test.txt
+	./bin/sheer s ./test.txt
 
 receive: build
-	./bin/p2pfileshare r
+	./bin/sheer r

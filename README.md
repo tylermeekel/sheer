@@ -23,7 +23,7 @@
       <a href="#about-the-project">About The Project</a>
     </li>
     <li>
-      <a href="#installation">Installation</a>
+      <a href="#getting-started">Getting Started</a>
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -43,10 +43,32 @@
 Sheer is a Peer-to-Peer filesharing command-line application. It utilizes WebRTC to establish a secure and direct connection between two users.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Installation
+## Getting Started
+### Installation
 Install using Go install:
 ```
 go install github.com/tylermeekel/sheer
+```
+
+### Configuration
+After running the program once, `config.json` is created in the same folder as the program.
+
+Each `server` shares a structure with [pion's ICEServer](https://pkg.go.dev/github.com/pion/webrtc/v3#ICEServer).
+```json
+//Example config file
+{
+  "servers": [
+    {
+      "urls": ["stun:stun.examplestunserver.com:1234"]
+    },
+    {
+      "urls": ["turn:turn.exampleturnserver.com:1234"],
+      "username": "username",
+      "credentials": "password",
+      "credentialtype": "password"
+    }
+  ]
+}
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

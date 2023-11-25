@@ -51,11 +51,13 @@ go install github.com/tylermeekel/sheer
 ```
 
 ### Configuration
-After running the program once, `config.json` is created in the same folder as the program.
+After running Sheer at least once, `sheerconfig.json` is created in the same folder as its executable file.
 
-Each `server` shares a structure with [pion's ICEServer](https://pkg.go.dev/github.com/pion/webrtc/v3#ICEServer).
+#### Structure:
+`servers: ` a list of [ICEServers](https://pkg.go.dev/github.com/pion/webrtc/v3#ICEServer).
+
+#### Example `sheerconfig.json` file
 ```json
-//Example config file
 {
   "servers": [
     {
@@ -70,6 +72,11 @@ Each `server` shares a structure with [pion's ICEServer](https://pkg.go.dev/gith
   ]
 }
 ```
+
+#### STUN vs TURN
+For *true* Peer-to-Peer connection, include only STUN servers in this config file, as TURN servers act as relay servers for data, and therefore aren't strictly Peer-to-Peer. Depending on the network of each peer, STUN may not be possible. Sheer will not be able to connect in these instances.
+
+For more information regarding STUN, TURN and the ICE framework, click [here](https://developer.liveswitch.io/liveswitch-server/guides/what-are-stun-turn-and-ice.html), or read the [MDN pages](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols) on WebRTC protocols.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -96,6 +103,7 @@ sheer [receive|r]
 
 - [ ] Ability to send directories
 - [ ] Helper server that makes copy-pasting easier
+- [ ] Clean up code
 
 See the [open issues](https://github.com/tylermeekel/sheer/issues) for a full list of proposed features (and known issues).
 
@@ -106,14 +114,7 @@ See the [open issues](https://github.com/tylermeekel/sheer/issues) for a full li
 <!-- CONTRIBUTING -->
 ## Contributing
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+If you have a suggestion that would make this better, please fork the repo and create a pull request.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -136,9 +137,6 @@ Tyler Meekel - ty.meekel@gmail.com
 Project Link: [https://github.com/tylermeekel/sheer](https://github.com/tylermeekel/sheer)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->

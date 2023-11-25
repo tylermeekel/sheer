@@ -74,7 +74,7 @@ After running Sheer at least once, `sheerconfig.json` is created in the same fol
 ```
 
 #### STUN vs TURN
-For *true* Peer-to-Peer connection, include only STUN servers in this config file, as TURN servers act as relay servers for data, and therefore aren't strictly Peer-to-Peer. Depending on the network of each peer, STUN may not be possible. Sheer will not be able to connect in these instances.
+For *true* Peer-to-Peer connection, include only STUN servers in this config file. However, depending on the network of each peer, connection using STUN may not be possible and Sheer will not be able to form a connection without a TURN server.
 
 For more information regarding STUN, TURN and the ICE framework, click [here](https://developer.liveswitch.io/liveswitch-server/guides/what-are-stun-turn-and-ice.html), or read the [MDN pages](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols) on WebRTC protocols.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

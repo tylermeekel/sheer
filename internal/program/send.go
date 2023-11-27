@@ -12,8 +12,9 @@ import (
 )
 
 type Offer struct {
-	Description webrtc.SessionDescription `json:"description"`
-	Metadata    Metadata                  `json:"metadata"`
+	Description    webrtc.SessionDescription `json:"description"`
+	Metadata       Metadata                  `json:"metadata"`
+	NumberOfChunks int
 }
 
 func send(config *Config, filepath string) {
@@ -62,7 +63,10 @@ func send(config *Config, filepath string) {
 	file.Close()
 
 	fmt.Println("Configuring connection information...")
-	ConfigureSenderPeerConnection(peerConnection, fileData)
+
+	chunks := splitBytesBySize(fileData, 65535)
+
+	ConfigureSenderPeerConnection(peerConnection, chunks)
 	ClearTerminal()
 
 	//Serialize localDescription into JSON
@@ -72,6 +76,7 @@ func send(config *Config, filepath string) {
 			FileName: fileInfo.Name(),
 			FileSize: fileInfo.Size(),
 		},
+		NumberOfChunks: len(chunks),
 	}
 
 	jsonOffer, err := json.Marshal(offer)
@@ -121,7 +126,7 @@ func send(config *Config, filepath string) {
 
 }
 
-func ConfigureSenderPeerConnection(peerConnection *webrtc.PeerConnection, fileData []byte) {
+func ConfigureSenderPeerConnection(peerConnection *webrtc.PeerConnection, chunks [][]byte) {
 	ConfigureDefaultPeerConnection(peerConnection)
 
 	//FILE DATA CHANNEL
@@ -139,22 +144,21 @@ func ConfigureSenderPeerConnection(peerConnection *webrtc.PeerConnection, fileDa
 	fileDataChannel.OnOpen(func() {
 		fmt.Println("Sending file data...")
 
-		if len(fileData) > 65535 {
-			chunks := splitBytesBySize(fileData, 65535)
-
-			fileDataChannel.SendText(fmt.Sprintf("%d", len(chunks)))
-			for _, chunk := range chunks {
-				fileDataChannel.Send(chunk)
-			}
-		} else {
-			err := fileDataChannel.Send(fileData)
-			if err != nil {
-				fmt.Println(err)
-			}
+		for _, chunk := range chunks {
+			fileDataChannel.Send(chunk)
 		}
 
-		for fileDataChannel.BufferedAmount() > 0 {}
-		fileDataChannel.SendText("done")
+		for fileDataChannel.BufferedAmount() > 0 {
+		}
+		fmt.Println("Done sending!")
+		fileDataChannel.SendText("sent")
+	})
+
+	fileDataChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
+		if string(msg.Data) == "done" {
+			fmt.Println("Data received... send complete!")
+			os.Exit(0)
+		}
 	})
 
 	//Configure Local SDP

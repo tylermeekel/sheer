@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"sync"
 
 	"github.com/pion/webrtc/v3"
@@ -70,32 +69,32 @@ func receive(config Config) {
 
 func ConfigureReceiverPeerConnection(peerConnection *webrtc.PeerConnection, offer Offer) {
 
+	var wg sync.WaitGroup
+	mux := &sync.Mutex{}
+	var data []byte
+
+	fmt.Println("numchunks:", offer.NumberOfChunks)
+	wg.Add(offer.NumberOfChunks)
+
 	peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
 
-		var wg sync.WaitGroup
-		mux := &sync.Mutex{}
-		var data []byte
+		d.OnClose(func() {
+			os.Exit(0)
+		})
 
 		d.OnMessage(func(msg webrtc.DataChannelMessage) {
-			// Use string messages to pass data and signal when done.
+			// Use string messages to signal when sending is complete.
 			if msg.IsString {
-				//Receive signal that sending is done
-				if string(msg.Data) == "done" {
-					//Wait for data to be added to slice
+				if string(msg.Data) == "sent" {
+					//Wait for data to be added to slice, close datachannel, and then write file.
 					wg.Wait()
+					d.Close()
 					err := os.WriteFile(offer.Metadata.FileName, data, 0644)
 					if err != nil {
 						fmt.Println("error writing file", err)
 					}
-					d.Close()
+					fmt.Println("File received!")
 					os.Exit(0)
-				} else {
-					n, err := strconv.Atoi(string(msg.Data))
-					print(n)
-					if err != nil {
-						panic(err)
-					}
-					wg.Add(n)
 				}
 			} else {
 				go func() {

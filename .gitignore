@@ -2,3 +2,4 @@ config.json
 go.sum
 bin
 test.txt
+.gitpod.yml

@@ -1,7 +1,7 @@
 package main
 
-import "github.com/tylermeekel/sheer/internal/cli"
+import "github.com/tylermeekel/sheer/internal/program"
 
 func main() {
-	cli.RunCLI()
+	program.RunCLI()
 }

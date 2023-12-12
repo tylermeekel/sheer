@@ -6,7 +6,7 @@ import (
 	"github.com/tylermeekel/sheer/internal/steps/style"
 )
 
-type styles struct {
+type singleSelectStyles struct {
 	screenStyle   lipgloss.Style
 	selectedStyle lipgloss.Style
 	titleStyle    lipgloss.Style
@@ -18,23 +18,19 @@ type singleSelectStep struct {
 	selected int
 	result   string
 
-	styles styles
+	styles singleSelectStyles
 }
 
 func New(title string, opts []string) *singleSelectStep {
-	screenStyle := lipgloss.NewStyle().
-		Padding(1, 4).Border(lipgloss.RoundedBorder()).BorderForeground(style.AccentColor)
+	screenStyle := style.BaseScreenStyle
 
 	selectedStyle := lipgloss.NewStyle().
 		Foreground(style.AccentColor).
 		Bold(true)
 
-	titleStyle := lipgloss.NewStyle().
-		Bold(true).
-		MarginBottom(1).
-		Underline(true)
+	titleStyle := style.BaseTitleStyle
 
-	style := styles{
+	style := singleSelectStyles{
 		screenStyle:   screenStyle,
 		selectedStyle: selectedStyle,
 		titleStyle: titleStyle,
@@ -50,7 +46,7 @@ func New(title string, opts []string) *singleSelectStep {
 	return &s
 }
 
-func (s *singleSelectStep) Next() {
+func (s *singleSelectStep) next() {
 	if s.selected < len(s.options)-1 {
 		s.selected++
 	} else {
@@ -58,7 +54,7 @@ func (s *singleSelectStep) Next() {
 	}
 }
 
-func (s *singleSelectStep) Prev() {
+func (s *singleSelectStep) prev() {
 	if s.selected > 0 {
 		s.selected--
 	} else {
@@ -71,9 +67,9 @@ func (s *singleSelectStep) Update(msg tea.Msg) (done bool) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyDown:
-			s.Next()
+			s.next()
 		case tea.KeyUp:
-			s.Prev()
+			s.prev()
 		case tea.KeyEnter:
 			s.result = s.options[s.selected]
 			done = true

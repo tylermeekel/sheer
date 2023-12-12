@@ -2,54 +2,54 @@ package mainmodel
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/tylermeekel/sheer/internal/steps/fileselect"
 	"github.com/tylermeekel/sheer/internal/steps/singleselect"
-)
-
-type Step interface {
-	Render() string
-	Update(msg tea.Msg) bool
-	Result() string
-}
-
-type StepTag int
-
-const (
-	sendReceive StepTag = iota
-	fileSelect
-	send
-	receive
+	"github.com/tylermeekel/sheer/internal/steps/step"
 )
 
 type mainModel struct {
-	steps       map[StepTag]Step
-	currentStep StepTag
+	steps       map[step.StepTag]step.Step
+	currentStep step.StepTag
 }
 
-func (em *mainModel) registerStep(tag StepTag, step Step) {
+func (em *mainModel) registerStep(tag step.StepTag, step step.Step) {
 	em.steps[tag] = step
 }
 
 func New() *mainModel {
 	em := mainModel{
-		steps: make(map[StepTag]Step),
+		steps: make(map[step.StepTag]step.Step),
 	}
 
-	em.registerStep(sendReceive, singleselect.New("Send or Receive a File?", []string{"Send", "Receive"}))
-	em.registerStep(fileSelect, singleselect.New("Select File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
-	em.registerStep(receive, singleselect.New("Receive a File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
+	//Main Step
+	em.registerStep(step.MainMenu, singleselect.New("Sheer", []string{"Send a File", "Receive a File", "Configuration"}))
+	
+	//Steps for Sending
+	em.registerStep(step.FileSelect, fileselect.New("Select a File to Send"))
+	//em.registerStep(send, )
+	
+	//Steps for Receiving
+	em.registerStep(step.Receive, singleselect.New("Receive a File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
+	
+	//Steps for config
+	em.registerStep(step.Config, singleselect.New("Configuration", []string{"Change option 1", "Change option 2"}))
 
-	em.currentStep = sendReceive
+	em.currentStep = step.MainMenu
 	return &em
 }
 
-func (em *mainModel) NextStep() StepTag {
+func (em *mainModel) NextStep() step.StepTag { //? Maybe each step should signal what the next step should be
 	switch em.currentStep {
-	case sendReceive:
-		if em.steps[em.currentStep].Result() == "Send" {
-			return fileSelect
-		} else if em.steps[em.currentStep].Result() == "Receive" {
-			return receive
+	case step.MainMenu:
+		if em.steps[step.MainMenu].Result() == "Send a File" {
+			return step.FileSelect
+		} else if em.steps[step.MainMenu].Result() == "Receive a File" {
+			return step.Receive
+		} else if em.steps[step.MainMenu].Result() == "Configuration" {
+			return step.Config
 		}
+	case step.FileSelect:
+		return step.Send
 	}
 
 	return -1
@@ -66,7 +66,7 @@ func (em *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return em, tea.Quit
 		default:
-			if isStepDone := em.steps[em.currentStep].Update(msg); isStepDone { // Unnecessary but more readable
+			if isStepDone := em.steps[em.currentStep].Update(msg); isStepDone {
 				next := em.NextStep()
 				if next == -1 {
 					return em, tea.Quit

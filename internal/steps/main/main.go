@@ -14,10 +14,10 @@ type Step interface {
 type StepTag int
 
 const (
-	SENDRECEIVE StepTag = iota
-	FILESELECT
-	SEND
-	RECEIVE
+	sendReceive StepTag = iota
+	fileSelect
+	send
+	receive
 )
 
 type mainModel struct {
@@ -34,21 +34,21 @@ func New() *mainModel {
 		steps: make(map[StepTag]Step),
 	}
 
-	em.registerStep(SENDRECEIVE, singleselect.New("Send or Receive a File?", []string{"Send", "Receive"}))
-	em.registerStep(FILESELECT, singleselect.New("Select File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
-	em.registerStep(RECEIVE, singleselect.New("Receive a File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
+	em.registerStep(sendReceive, singleselect.New("Send or Receive a File?", []string{"Send", "Receive"}))
+	em.registerStep(fileSelect, singleselect.New("Select File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
+	em.registerStep(receive, singleselect.New("Receive a File", []string{"This is actually a test.", "This is a test", "Remember when I said this was a test"}))
 
-	em.currentStep = SENDRECEIVE
+	em.currentStep = sendReceive
 	return &em
 }
 
 func (em *mainModel) NextStep() StepTag {
-	switch em.currentStep{
-	case SENDRECEIVE:
+	switch em.currentStep {
+	case sendReceive:
 		if em.steps[em.currentStep].Result() == "Send" {
-			return FILESELECT
+			return fileSelect
 		} else if em.steps[em.currentStep].Result() == "Receive" {
-			return RECEIVE
+			return receive
 		}
 	}
 

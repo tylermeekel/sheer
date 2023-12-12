@@ -9,7 +9,7 @@ import (
 )
 
 func RunCLI() {
-	p := tea.NewProgram(mainmodel.New(), tea.WithAltScreen())
+	p := tea.NewProgram(mainmodel.New())
 
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error: %v", err)

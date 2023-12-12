@@ -3,6 +3,7 @@ package fileselect
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -14,6 +15,7 @@ type fileSelectStyles struct {
 	titleStyle    lipgloss.Style
 	selectedStyle lipgloss.Style
 	dirStyle      lipgloss.Style
+	hintStyle     lipgloss.Style
 }
 
 type fileSelectStep struct {
@@ -33,6 +35,7 @@ func New(title string) *fileSelectStep {
 	styles.titleStyle = style.BaseTitleStyle
 	styles.dirStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("81"))
 	styles.selectedStyle = lipgloss.NewStyle().Foreground(style.AccentColor).Bold(true)
+	styles.hintStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#A9A9A9")).MarginTop(2)
 
 	filepath := "."
 	files, err := os.ReadDir(filepath)
@@ -75,6 +78,17 @@ func (fs *fileSelectStep) Update(msg tea.Msg) bool {
 			fs.next()
 		case tea.KeyUp:
 			fs.prev()
+		case tea.KeyLeft:
+			if fs.filepath != "." {
+				fs.filepath = fs.filepath[:strings.LastIndex(fs.filepath, "/")]
+				fs.selected = 0
+				var err error
+				fs.files, err = os.ReadDir(fs.filepath)
+				if err != nil {
+					fmt.Println("Error reading files")
+					os.Exit(1)
+				}
+			}
 		case tea.KeyEnter:
 			file := fs.files[fs.selected]
 			if file.IsDir() {
@@ -114,6 +128,7 @@ func (fs *fileSelectStep) Render() string {
 		}
 	}
 
+	if fs.filepath != "." {str += fs.styles.hintStyle.Render("(←) Go Back")}
 	return fs.styles.screenStyle.Render(str)
 }
 

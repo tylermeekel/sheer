@@ -1,4 +1,4 @@
-package singleselectstep
+package singleselect
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
@@ -8,6 +8,7 @@ type singleSelectStep struct {
 	title    string
 	options  []string
 	selected int
+	result   string
 }
 
 func New(title string, opts []string) *singleSelectStep {
@@ -36,7 +37,7 @@ func (s *singleSelectStep) Prev() {
 	}
 }
 
-func (s *singleSelectStep) Update(msg tea.Msg) string {
+func (s *singleSelectStep) Update(msg tea.Msg) (done bool) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -45,11 +46,12 @@ func (s *singleSelectStep) Update(msg tea.Msg) string {
 		case tea.KeyUp:
 			s.Prev()
 		case tea.KeyEnter:
-			return s.options[s.selected]
+			s.result = s.options[s.selected]
+			done = true
 		}
 	}
-
-	return ""
+	
+	return
 }
 
 func (s *singleSelectStep) Render() string {
@@ -65,4 +67,8 @@ func (s *singleSelectStep) Render() string {
 	}
 
 	return str
+}
+
+func (s *singleSelectStep) Result() string {
+	return s.result
 }
